@@ -68,7 +68,7 @@ done
 shift $((OPTIND-1))
 
 # make sure $VIRTUAL_ENV_ROOT exists
-[ -d "$VIRTUALENV_ROOT" ] ||  abort "$VIRTUALENV_ROOT does not exist"
+[ -d "$VIRTUAL_ENV_ROOT" ] ||  abort "$VIRTUAL_ENV_ROOT does not exist"
 
 # no arguments so print all virtualenvs
 [ $# -eq 0 ] && list
