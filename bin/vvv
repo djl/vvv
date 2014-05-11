@@ -20,7 +20,13 @@ usage() {
 
 activate() {
   VIRTUAL_ENV="$VIRTUAL_ENV_ROOT/$1"
-  [ -d "$VIRTUAL_ENV" ] || abort "Unknown virtualenv '$1'"
+  if [ ! -d "$VIRTUAL_ENV" ]; then
+    if [ -n "$VIRTUAL_ENV_AUTO_CREATE" ]; then
+      create "$1" "${@:2}"
+    else
+      abort "Unknown virtualenv '$1'"
+    fi
+  fi
   shift
 
   export VIRTUAL_ENV
