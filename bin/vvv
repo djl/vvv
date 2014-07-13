@@ -2,7 +2,8 @@
 #/ Usage: vvv [<options>] <env> [<command> [<args>]]
 #/
 #/ Options:
-#/   -c ENV [virtualenv_opts] Create a virtuelenv with the given options
+#/   -c ENV [virtualenv_opts] Create and activate a virtualenv
+#/   -m ENV [virtualenv_opts] Create a virtualenv but don't activate
 #/   -d ENV                   Delete a virtualenv
 #/   -h                       Print this message and exit
 PROGNAME=$(basename "$0")
@@ -54,7 +55,7 @@ list() {
   exit
 }
 
-while getopts :hd:c: o; do
+while getopts :hd:c:m: o; do
   case "$o" in
     d)
       delete "$OPTARG"
@@ -63,6 +64,10 @@ while getopts :hd:c: o; do
     c)
       create "$OPTARG" "${@:3}"
       activate "$OPTARG"
+      exit
+      ;;
+    m)
+      create "$OPTARG" "${@:3}"
       exit
       ;;
     h|\?|:)
