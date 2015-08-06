@@ -80,5 +80,8 @@ shift $((OPTIND-1))
 # no arguments so print all virtualenvs
 [ $# -eq 0 ] && list
 
+# make sure the virtualenv exists
+[ -d "$VVV_ROOT/$1" ] || abort "Unknown virtualenv '$1'"
+
 # go!
 activate "$1" "${@:2}"
