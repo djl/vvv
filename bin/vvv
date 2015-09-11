@@ -1,13 +1,17 @@
 #!/bin/sh
-#/ Usage: vvv [<options>] <env> [<command> [<args>]]
+#/ Usage: vvv <options>
 #/
-#/ Options:
-#/   -c ENV [virtualenv_opts] Create and activate a virtualenv
-#/   -m ENV [virtualenv_opts] Create a virtualenv but don't activate
-#/   -d ENV                   Delete a virtualenv
-#/   -h                       Print this message and exit
+#/ Commands:
+#/   -c <name> [<source>]     Create a new environment
+#/   -d <name>                Delete an environment
+#/   -l                       List all sources
+set -e
 PROGNAME=$(basename "$0")
-VVV_ROOT="${VVV_ROOT:-$HOME/.virtualenvs}"
+
+VVV_ROOT="${VVV_ROOT:-$HOME/.vvv}"
+VVV_ENVS="${VVV_ENVS:-$VVV_ROOT/envs}"
+VVV_SOURCES="${VVV_SOURCES:-$VVV_ROOT/sources}"
+VVV_ENV_FILE=".vvvenv"
 
 abort() {
   echo "$PROGNAME: $1" >&2
@@ -20,68 +24,73 @@ usage() {
 }
 
 activate() {
-  VIRTUAL_ENV="$VVV_ROOT/$1"
-  if [ ! -d "$VIRTUAL_ENV" ]; then
-    abort "Unknown virtualenv '$1'"
-  fi
+  name=$1
+  VVV_ACTIVE_ENV="$VVV_ENVS/$name"
+  [ -d "$VVV_ACTIVE_ENV" ] || abort "Unknown environment '$name'"
   shift
-
-  export VIRTUAL_ENV
-  export PATH="$VIRTUAL_ENV/bin:$PATH"
-  unset PYTHON_HOME
+  export VVV_ACTIVE_ENV
+  [ -f "$VVV_ACTIVE_ENV/$VVV_ENV_FILE" ] && source "$VVV_ACTIVE_ENV/$VVV_ENV_FILE"
   exec "${@:-$SHELL}"
 }
 
 create() {
-  [ -d "$VVV_ROOT/$1" ] && abort "virtualenv '$1' already exists"
-  virtualenv ${@:2} "$VVV_ROOT/$1"
+  name=$1
+  source=$2
+  [ -n "$name" ] || usage
+  [ -n "$source" -a -f "$VVV_SOURCES/$source" ] || abort "Unknown source '$source'"
+  [ -d "$VVV_ENVS/$name" ] && abort "Environment '$name' already exists"
+  mkdir -p "$VVV_ENVS/$name"
+  if [ -n "$source" ]; then
+    if [ -n "$VVV_COPY_SOURCE" ]; then
+      cp $VVV_SOURCES/$source $VVV_ENVS/$name/$VVV_ENV_FILE
+    else
+      ln -s $VVV_SOURCES/$source $VVV_ENVS/$name/$VVV_ENV_FILE
+    fi
+  fi
+  [ -n "$VVV_AUTO_ACTIVATE" ] && activate "$name"
 }
 
 delete() {
-  if [ -n "$VIRTUAL_ENV" ]; then
-    if [ "$(basename $VIRTUAL_ENV)" = "$1" ]; then
-      abort "Cannot delete the active virtualenv"
-    fi
-  fi
-  rm -rf "$VVV_ROOT/$1"
+  for x in $@; do
+    rm -rf "$VVV_ENVS/$x"
+  done
 }
 
-list() {
-  find "$VVV_ROOT" -maxdepth 1 -type d | sed '1d' | xargs -n1 basename 2> /dev/null
-  exit
+list_envs() {
+  find "$VVV_ENVS/" -maxdepth 1 -type d | sed '1d' | xargs -n1 basename 2> /dev/null
 }
 
-while getopts :hd:c:m: o; do
+list_sources() {
+  find "$VVV_SOURCES" -maxdepth 1 -type f | xargs -n1 basename 2> /dev/null
+}
+
+while getopts :hld:c: o; do
   case "$o" in
-    d)
-      delete "$OPTARG"
-      exit
-      ;;
-    c)
-      create "$OPTARG" "${@:3}"
-      activate "$OPTARG"
-      exit
-      ;;
-    m)
-      create "$OPTARG" "${@:3}"
-      exit
-      ;;
-    h|\?|:)
-      usage
-      ;;
+  l)
+    list_sources
+    exit
+    ;;
+  c)
+    shift 2
+    create "$OPTARG" "$1"
+    exit
+    ;;
+  d)
+    shift
+    delete "$@"
+    exit
+    ;;
+  *)
+    usage
+    ;;
   esac
 done
 
 shift $((OPTIND-1))
 
-# make sure $VVV_ROOT exists
-[ -d "$VVV_ROOT" ] ||  abort "$VVV_ROOT does not exist"
+if [ $# -eq 0 ]; then
+  list_envs
+  exit
+fi
 
-# no arguments so print all virtualenvs
-[ $# -eq 0 ] && list
-
-# make sure the virtualenv exists
-[ -d "$VVV_ROOT/$1" ] || abort "Unknown virtualenv '$1'"
-
-# go!
 activate "$1" "${@:2}"
