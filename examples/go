@@ -1,0 +1,14 @@
+#!/bin/sh
+# vvv: A simple environment which sets up GOPATH
+
+# create the new directories
+mkdir -p $VVV_ACTIVE_ENV/{pkg,bin,src}
+
+# Add the new bin directory to PATH
+export PATH="$VVV_ACTIVE_ENV/bin:$PATH"
+
+# setup GOPATH
+export GOPATH=$VVV_ACTIVE_ENV
+
+# I always want godep. Always.
+go get github.com/tools/godep

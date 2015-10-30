@@ -1,0 +1,5 @@
+#!/bin/sh
+# vvv: Creates or activates a virtualenv
+export PATH="$VVV_ACTIVE_ENV/bin:$PATH"
+unset PYTHON_HOME
+[ -d $VVV_ACTIVE_ENV/lib ] || virtualenv "$VVV_ACTIVE_ENV"
