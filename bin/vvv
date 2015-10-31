@@ -10,13 +10,10 @@
 #/         List all templates
 #/     vvv activate ENV [CMD...]
 #/         Activate an environment
-#/     vvv version
-#/         Show version information
 #/     vvv help
 #/         Show this message and exit
 set -e
 PROGNAME=$(basename "$0")
-VERSION="0.0.1"
 
 VVV_ROOT="${VVV_ROOT:-$HOME/.vvv}"
 VVV_ENVS="${VVV_ENVS:-$VVV_ROOT/envs}"
@@ -91,7 +88,7 @@ cmd_templates() {
   local templates=$(find "$VVV_TEMPLATES" -maxdepth 1 -type f | xargs -n1 basename 2> /dev/null)
   for t in $templates; do
     local desc=$(grep -E "^# vvv: " "$VVV_TEMPLATES/$t" | sed "s/\(.*\)vvv:[[:space:]]*\(.*\)/\\2/")
-    if [ -n "$desc" ]; then
+    if [ -n "$desc" -a -z "$1" ]; then
        echo "$t - $desc"
     else
        echo $t
