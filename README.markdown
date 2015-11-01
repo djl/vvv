@@ -93,11 +93,11 @@ Some environment variables `vvv` will respect.
 
 * `$VVV_ENVS`
 
-  The directory where environments are stored,
+  The directory where environments are stored.
 
 * `$VVV_TEMPLATES`
 
-  The directory containing your templates,
+  The directory containing your templates.
 
 * `$VVV_SYMLINK_TEMPLATE`
 
