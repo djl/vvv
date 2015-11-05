@@ -51,21 +51,21 @@ Environments are always activated in a new shell. This is done for two reasons:
 
 An example of running commands inside an environment:
 
-   # The "go" template sets $GOPATH
-   $ cat ~/.vvv/templates/go
-   export $GOPATH=~/prj/go/
-
-   # Create the new environment
-   $ vvv create -t go go-demo
-
-   # The variable isn't set outside the environment
-   $ echo $GOPATH
-   
-   $
-
-   # But it is set inside the environment
-   $ vvv activate go-demo echo $GOPATH
-   /home/djl/prj/go
+    # The "go" template sets $GOPATH
+    $ cat ~/.vvv/templates/go
+    export $GOPATH=~/prj/go/
+    
+    # Create the new environment
+    $ vvv create -t go go-demo
+    
+    # The variable isn't set outside the environment
+    $ echo $GOPATH
+    
+    $
+    
+    # But it is set inside the environment
+    $ vvv activate go-demo echo $GOPATH
+    /home/djl/prj/go
 
 
 ## Templates
