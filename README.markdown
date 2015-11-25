@@ -35,13 +35,12 @@ different environments. The basic workflow would be something like:
 Environments are just directories stored in a specific place
 (`~/.vvv/envs` by default). You can store anything you like in them.
 
-There is just one special file `vvv` in there cares about -
+There is just one special file in there `vvv` cares about -
 `.vvv-env`. This a "template" that will be sourced when the
-environment is activated.
+environment is activated. See below for more information on templates.
 
-See below for more information on templates.
-
-Environments are always activated in a new shell. This is done for two reasons:
+Environments are always activated in a new shell. This is done for two
+reasons:
 
 1. It avoids having to deal with restoring any previous environments
    and all the hassle that entails.
@@ -59,9 +58,8 @@ An example of running commands inside an environment:
     $ vvv create -t go go-demo
     
     # The variable isn't set outside the environment
-    $ echo $GOPATH
-    
-    $
+    $ echo "\$GOPATH == $GOPATH"
+    $GOPATH == 
     
     # But it is set inside the environment
     $ vvv activate go-demo echo $GOPATH
@@ -80,7 +78,7 @@ If you'd rather the template files be symlinked into the environment
 instead you can set the `$VVV_SYMLINK_TEMPLATE` environment variable.
 
 As templates are just shell scripts, you can do pretty much anything
-you like inside them - activate a virtualenv, set $PATH, install a
+you like inside them - activate a virtualenv, set the $PATH, install a
 package, etc.
 
 See the `examples` directory for some basic ideas.
@@ -103,7 +101,7 @@ Some environment variables `vvv` will respect.
 
   Symlink, rather than copy, the template into the environment.
   This may be useful if you share a common template among multiple
-  environments and want all them to receive the new config.
+  environments.
 
   (This variable can be set to anything)
 
