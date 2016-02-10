@@ -14,7 +14,7 @@ different environments. The basic workflow would be something like:
 
 ## Usage
 
-    vvv create [-t TEMPLATE] ENV
+    vvv create [-t TEMPLATE] ENV [-- ARGS...]
         Create a new environment from optional TEMPLATE
     vvv rm ENV [...]
         Delete the given environments
@@ -35,9 +35,8 @@ different environments. The basic workflow would be something like:
 Environments are just directories stored in a specific place
 (`~/.vvv/envs` by default). You can store anything you like in them.
 
-There is just one special file in there `vvv` cares about -
-`.vvv-env`. This a "template" that will be sourced when the
-environment is activated. See below for more information on templates.
+New environments are created from templates (see below for more
+information on templates).
 
 Environments are always activated in a new shell. This is done for two
 reasons:
@@ -51,7 +50,7 @@ reasons:
 An example of running commands inside an environment:
 
     # The "go" template sets $GOPATH
-    $ cat ~/.vvv/templates/go
+    $ cat ~/.vvv/templates/go/env
     export $GOPATH=~/prj/go/
     
     # Create the new environment
@@ -68,11 +67,39 @@ An example of running commands inside an environment:
 
 ## Templates
 
+A template is a directory which contains some files. Again, anything
+can be stored in here but `vvv` only cares about three files:
+
+* `env`
+
+  A shell script that will be sourced when the new environment
+  is activated.
+
+  If you'd like to set environment variables for you environment, this
+  would be the place to do it.
+
+* `create` (optional)
+
+  If this file exists, and is executable, this will be executed just
+  after the new environment directory is created.
+
+  Arguments passed at the path to the new environment directory and
+  any extra arguments passed to the `vvv create` command.
+
+* `delete` (optional)
+
+  If this file exists, and is executable, this will be executed just
+  before the environment is deleted.
+
+  Arguments passed at the path to the new environment directory and
+  any extra arguments passed to the `vvv create` command.
+
+
 Templates are just shell scripts sourced when an environment is
-activated. By default, templates are stored in `~/.vvv/templates`.
+activated. By default, templates are stored in `~/.config/templates`.
 
 When creating a new environment, `vvv` will copy the specified
-template (if any) into your environment.
+template directory, if any, into your environment (as `.vvv`).
 
 If you'd rather the template files be symlinked into the environment
 instead you can set the `$VVV_SYMLINK_TEMPLATE` environment variable.

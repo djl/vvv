@@ -1,5 +1,5 @@
 #!/bin/sh
-# vvv: A simple environment which sets up GOPATH
+# A simple environment which sets up GOPATH and install godep
 
 # create the new directories
 mkdir -p $VVV_ACTIVE_ENV/{pkg,bin,src}

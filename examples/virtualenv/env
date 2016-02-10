@@ -1,0 +1,4 @@
+#!/bin/sh
+# Configures PATH and unsets PYTHON_HOME
+export PATH="$VVV_ACTIVE_ENV/bin:$PATH"
+unset PYTHON_HOME

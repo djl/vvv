@@ -1,0 +1,21 @@
+#!/bin/sh
+# Options:
+#   -p PYTHON      Path to the Python binary to be used
+ENVDIR=$1
+shift
+
+use_this_python=""
+
+while getopts :p:V o; do
+  case "$o" in
+    p)
+      use_this_python="$OPTARG"
+      ;;
+  esac
+done
+
+if [ -n "$use_this_python" ]; then
+  [ -d $VVV_ACTIVE_ENV/lib ] || virtualenv -p "$use_this_python" "$ENVDIR"
+else
+  [ -d $VVV_ACTIVE_ENV/lib ] || virtualenv "$ENVDIR"
+fi

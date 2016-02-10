@@ -1,0 +1,3 @@
+#!/bin/sh
+# Spits out a requirements.txt when deleting the environment
+pip freeze

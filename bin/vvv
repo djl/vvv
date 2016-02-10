@@ -18,7 +18,6 @@ PROGNAME=$(basename "$0")
 VVV_ROOT="${VVV_ROOT:-$HOME/.vvv}"
 VVV_ENVS="${VVV_ENVS:-$VVV_ROOT/envs}"
 VVV_TEMPLATES="${VVV_TEMPLATES:-$VVV_ROOT/templates}"
-VVV_ENV_FILE=".vvv-env"
 
 abort() {
   echo "$PROGNAME: $1" >&2
@@ -44,7 +43,7 @@ cmd_activate() {
 
   shift
   export VVV_ACTIVE_ENV
-  [ -f "$VVV_ACTIVE_ENV/$VVV_ENV_FILE" ] && source "$VVV_ACTIVE_ENV/$VVV_ENV_FILE"
+  [ -f "$VVV_ACTIVE_ENV/.vvv/env" ] && source "$VVV_ACTIVE_ENV/.vvv/env"
   exec "${@:-$SHELL}"
 }
 
@@ -60,23 +59,46 @@ cmd_create() {
 
   shift $((OPTIND-1))
   name=$1
+  shift
   [ -n "$name" ] || cmd_usage
-  [ -n "$template" -a -f "$VVV_TEMPLATES/$template" ] || abort "Unknown template '$template'"
+  [ -n "$template" -a -f "$VVV_TEMPLATES/$template/env" ] || abort "Unknown template '$template'"
   [ -d "$VVV_ENVS/$name" ] && abort "Environment '$name' already exists"
+
+  # keep these args and pass them onto the create hook (if it exists)
+  [ "$1" = "--" ] && shift
+
   mkdir -p "$VVV_ENVS/$name"
+  # Copy/symlink over the template directory
+  # TODO just copy the env/delete files instead?
   if [ -n "$template" ]; then
     if [ -n "$VVV_SYMLINK_TEMPLATE" ]; then
-      ln -s $VVV_TEMPLATES/$template $VVV_ENVS/$name/$VVV_ENV_FILE
+      ln -s $VVV_TEMPLATES/$template $VVV_ENVS/$name/.vvv
     else
-      cp $VVV_TEMPLATES/$template $VVV_ENVS/$name/$VVV_ENV_FILE
+      cp -R $VVV_TEMPLATES/$template $VVV_ENVS/$name/.vvv
     fi
   fi
+
+  # Call the create hook giving it the path to the new env and any
+  # extra arguments we got
+  [ -e "$VVV_ENVS/$name/.vvv/create" ] && "$VVV_ENVS/$name/.vvv/create" "$VVV_ENVS/$name" $@
   [ -n "$VVV_AUTO_ACTIVATE" ] && cmd_activate "$name"
 }
 
 cmd_delete() {
+  delete_these=()
+
   for x in $@; do
-    rm -rf "$VVV_ENVS/$x"
+    if [ $x = "--" ]; then
+      shift 2
+      break
+    else
+      delete_these+=($x)
+    fi
+  done
+
+  for x in $delete_these; do
+    [ -e "$VVV_ENVS/$x/.vvv/delete" ] && "$VVV_ENVS/$x/.vvv/delete" "$VVV_ENVS/$x" $@
+    [ -d "$VVV_ENVS/$x" ] && rm -rf "$VVV_ENVS/$x"
   done
 }
 
