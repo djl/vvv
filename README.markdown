@@ -16,7 +16,7 @@ different environments. The basic workflow would be something like:
 
     vvv create [-t TEMPLATE] ENV [-- ARGS...]
         Create a new environment from optional TEMPLATE
-    vvv rm ENV [...]
+    vvv rm ENV [ENV...] [-- ARGS...]
         Delete the given environments
     vvv ls
         List all environments
@@ -24,8 +24,8 @@ different environments. The basic workflow would be something like:
         List all templates
     vvv activate ENV [CMD...]
         Activate an environment
-    vvv version
-        Show version information
+    vvv current
+        Show the current environment (if any)
     vvv help
         Show this message and exit
 
@@ -83,7 +83,7 @@ can be stored in here but `vvv` only cares about three files:
   If this file exists, and is executable, this will be executed just
   after the new environment directory is created.
 
-  Arguments passed at the path to the new environment directory and
+  Arguments passed are the path to the new environment directory and
   any extra arguments passed to the `vvv create` command.
 
 * `delete` (optional)
@@ -91,8 +91,8 @@ can be stored in here but `vvv` only cares about three files:
   If this file exists, and is executable, this will be executed just
   before the environment is deleted.
 
-  Arguments passed at the path to the new environment directory and
-  any extra arguments passed to the `vvv create` command.
+  Arguments passed are the path to the new environment directory and
+  any extra arguments passed to the `vvv delete` command.
 
 
 Templates are just shell scripts sourced when an environment is
