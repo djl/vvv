@@ -29,11 +29,6 @@ cmd_usage() {
   exit 2
 }
 
-cmd_version() {
-  echo "$PROGNAME $VERSION"
-  exit
-}
-
 cmd_activate() {
   local name=$1
   [ -n "$name" ] || cmd_usage
@@ -148,10 +143,6 @@ case "$1" in
   current)
     shift
     cmd_current "$@"
-    ;;
-  version|--version)
-    shift
-    cmd_version "$@"
     ;;
   list|ls|l|'')
     shift || true
