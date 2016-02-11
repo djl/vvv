@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #/ Usage:
 #/     vvv create [-t TEMPLATE] ENV
 #/         Create a new environment from optional TEMPLATE
