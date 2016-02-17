@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+#/ Usage:
+#/     wo create [-t TEMPLATE] ENV
+#/         Create a new environment from optional TEMPLATE
+#/     wo rm ENV [...]
+#/         Delete the given environments
+#/     wo ls
+#/         List all environments
+#/     wo templates
+#/         List all templates
+#/     wo activate ENV [CMD...]
+#/         Activate an environment
+#/     wo help
+#/         Show this message and exit
+set -e
+PROGNAME=$(basename "$0")
+
+PREFIX="${WO_ROOT:-$HOME/.wo}"
+ENV_DIR="${ENV_DIR:-$PREFIX/envs}"
+TEMPLATES_DIR="${WO_TEMPLATES:-$PREFIX/templates}"
+
+abort() {
+  echo "$PROGNAME: $1" >&2
+  exit 1
+}
+
+cmd_usage() {
+  grep "^#/" $0 | cut -c4- >&2
+  exit 2
+}
+
+cmd_activate() {
+  local name=$1
+  [ -n "$name" ] || cmd_usage
+
+  WO_ACTIVE_ENV="$ENV_DIR/$name"
+  [ -d "$WO_ACTIVE_ENV" ] || abort "Unknown environment '$name'"
+
+  shift
+  export WO_ACTIVE_ENV
+  [ -f "$WO_ACTIVE_ENV/.wo/env" ] && source "$WO_ACTIVE_ENV/.wo/env"
+  exec "${@:-$SHELL}"
+}
+
+cmd_create() {
+  local name template
+  while getopts :t: o; do
+    case "$o" in
+    t)
+      template=$OPTARG
+      ;;
+    esac
+  done
+
+  shift $((OPTIND-1))
+  name=$1
+  shift
+  [ -n "$name" ] || cmd_usage
+  [ -n "$template" -a -f "$TEMPLATES_DIR/$template/env" ] || abort "Unknown template '$template'"
+  [ -d "$ENV_DIR/$name" ] && abort "Environment '$name' already exists"
+
+  # keep these args and pass them onto the create hook (if it exists)
+  [ "$1" = "--" ] && shift
+
+  mkdir -p "$ENV_DIR/$name"
+  # Copy/symlink over the template directory
+  # TODO just copy the env/delete executables instead?
+  if [ -n "$template" ]; then
+    if [ -n "$WO_SYMLINK_TEMPLATE" ]; then
+      ln -s $TEMPLATES_DIR/$template $ENV_DIR/$name/.wo
+    else
+      cp -R $TEMPLATES_DIR/$template $ENV_DIR/$name/.wo
+    fi
+  fi
+
+  # Call the create hook giving it the path to the new env and any
+  # extra arguments we got
+  [ -e "$ENV_DIR/$name/.wo/create" ] && "$ENV_DIR/$name/.wo/create" "$ENV_DIR/$name" $@
+  [ -n "$WO_AUTO_ACTIVATE" ] && cmd_activate "$name"
+}
+
+cmd_delete() {
+  delete_these=()
+
+  for x in $@; do
+    if [ $x = "--" ]; then
+      shift 2
+      break
+    else
+      delete_these+=($x)
+    fi
+  done
+
+  for x in $delete_these; do
+    [ -e "$ENV_DIR/$x/.wo/delete" ] && "$ENV_DIR/$x/.wo/delete" "$ENV_DIR/$x" $@
+    [ -d "$ENV_DIR/$x" ] && rm -rf "$ENV_DIR/$x"
+  done
+}
+
+cmd_list() {
+  find "$ENV_DIR/" -maxdepth 1 -type d | sed '1d' | xargs -n1 basename 2> /dev/null
+}
+
+cmd_templates() {
+  local templates=$(find "$TEMPLATES_DIR" -maxdepth 1 -type f | xargs -n1 basename 2> /dev/null)
+  for t in $templates; do
+    local desc=$(grep -E "^# wo: " "$TEMPLATES_DIR/$t" | sed "s/\(.*\)wo:[[:space:]]*\(.*\)/\\2/")
+    if [ -n "$desc" -a -z "$1" ]; then
+       echo "$t - $desc"
+    else
+       echo $t
+    fi
+  done
+}
+
+cmd_current() {
+  if [ -n "$WO_ACTIVE_ENV" ]; then
+    basename "$WO_ACTIVE_ENV"
+  else
+    echo "No currently active environment"
+  fi
+}
+
+case "$1" in
+  create|new|c|n) shift;          cmd_create "$@" ;;
+  delete|rm) shift;               cmd_delete "$@" ;;
+  templates|t) shift;             cmd_templates "$@" ;;
+  activate|use|a|u|.) shift;      cmd_activate "$@" ;;
+  current) shift;                 cmd_current "$@" ;;
+  list|ls|l|'') shift || true;    cmd_list "$@" ;;
+  *)                              cmd_usage ;;
+esac
+exit 0
