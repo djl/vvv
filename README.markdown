@@ -12,7 +12,7 @@ workspace environments. The basic workflow would be something like:
 
 ## Usage
 
-    wo create [-t TEMPLATE] ENV [-- ARGS...]
+    wo create ENV [TEMPLATE] [-- ARGS...]
         Create a new environment from optional TEMPLATE
     wo rm ENV [ENV...] [-- ARGS...]
         Delete the given environments

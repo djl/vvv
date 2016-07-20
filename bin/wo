@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #/ Usage:
-#/     wo create [-t TEMPLATE] ENV
+#/     wo create ENV [TEMPLATE]
 #/         Create a new environment from optional TEMPLATE
 #/     wo rm ENV [...]
 #/         Delete the given environments
@@ -44,25 +44,23 @@ cmd_activate() {
 
 cmd_create() {
   local name template
-  while getopts :t: o; do
-    case "$o" in
-    t)
-      template=$OPTARG
-      ;;
-    esac
-  done
-
-  shift $((OPTIND-1))
-  name=$1
-  shift
+  name="$1"
   [ -n "$name" ] || cmd_usage
-  [[ -n "$template" && -f "$TEMPLATES_DIR/$template/env" ]] || abort "Unknown template '$template'"
+
+  shift
+  template="$1"
+  shift
+
+  if [ "$template" != "--" ]; then
+    shift
+    if [[ -n "$template" && ! -f "$TEMPLATES_DIR/$template/env" ]]; then
+      abort "Unknown template '$template'"
+    fi
+  fi
   [ -d "$ENV_DIR/$name" ] && abort "Environment '$name' already exists"
 
-  # keep these args and pass them onto the create hook (if it exists)
-  [ "$1" = "--" ] && shift
-
   mkdir -p "$ENV_DIR/$name"
+
   # Copy/symlink over the template directory
   # TODO just copy the env/delete executables instead?
   if [ -n "$template" ]; then
