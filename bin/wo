@@ -52,7 +52,7 @@ cmd_create() {
   shift || true
 
   if [ "$template" != "--" ]; then
-    shift
+    shift || true
     if [[ -n "$template" && ! -f "$TEMPLATES_DIR/$template/env" ]]; then
       abort "Unknown template '$template'"
     fi
