@@ -52,7 +52,7 @@ An example of running commands inside an environment:
     export $GOPATH=~/prj/go/
     
     # Create the new environment
-    $ wo create -t go go-demo
+    $ wo create go-demo go
     
     # The variable isn't set outside the environment
     $ echo "\$GOPATH == $GOPATH"
@@ -94,7 +94,7 @@ can be stored in here but `wo` only cares about three files:
 
 
 Templates are just shell scripts sourced when an environment is
-activated. By default, templates are stored in `~/.config/templates`.
+activated. By default, templates are stored in `~/.config/wo/templates`.
 
 When creating a new environment, `wo` will copy the specified
 template directory, if any, into your environment (as `.wo`).
