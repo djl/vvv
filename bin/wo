@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #/ Usage:
-#/     wo create ENV [TEMPLATE]
+#/     wo mk ENV [TEMPLATE]
 #/         Create a new environment from optional TEMPLATE
 #/     wo rm ENV [...]
 #/         Delete the given environments
@@ -42,7 +42,7 @@ cmd_activate() {
   exec "${@:-$SHELL}"
 }
 
-cmd_create() {
+cmd_mk() {
   local name template
   name="$1"
   [ -n "$name" ] || cmd_usage
@@ -77,7 +77,7 @@ cmd_create() {
   [ -n "$WO_AUTO_ACTIVATE" ] && cmd_activate "$name"
 }
 
-cmd_delete() {
+cmd_rm() {
   delete_these=()
 
   for x in "$@"; do
@@ -112,8 +112,8 @@ cmd_current() {
 }
 
 case "$1" in
-  create|c) shift;                cmd_create "$@" ;;
-  delete|rm) shift;               cmd_delete "$@" ;;
+  mk) shift;                      cmd_mk "$@" ;;
+  rm) shift;                      cmd_rm "$@" ;;
   templates|t) shift;             cmd_templates "$@" ;;
   activate|use|a|u|.) shift;      cmd_activate "$@" ;;
   current) shift;                 cmd_current "$@" ;;
