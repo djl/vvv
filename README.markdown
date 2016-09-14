@@ -12,7 +12,7 @@ workspace environments. The basic workflow would be something like:
 
 ## Usage
 
-    wo create ENV [TEMPLATE] [-- ARGS...]
+    wo mk ENV [TEMPLATE] [-- ARGS...]
         Create a new environment from optional TEMPLATE
     wo rm ENV [ENV...] [-- ARGS...]
         Delete the given environments
@@ -52,7 +52,7 @@ An example of running commands inside an environment:
     export $GOPATH=~/prj/go/
     
     # Create the new environment
-    $ wo create go-demo go
+    $ wo mk go-demo go
     
     # The variable isn't set outside the environment
     $ echo "\$GOPATH == $GOPATH"
@@ -76,13 +76,13 @@ can be stored in here but `wo` only cares about three files:
   If you'd like to set environment variables for you environment, this
   would be the place to do it.
 
-* `create` (optional)
+* `mk` (optional)
 
   If this file exists, and is executable, this will be executed just
   after the new environment directory is created.
 
   Arguments passed are the path to the new environment directory and
-  any extra arguments passed to the `wo create` command.
+  any extra arguments passed to the `wo mk` command.
 
 * `delete` (optional)
 
